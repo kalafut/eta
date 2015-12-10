@@ -1,0 +1,44 @@
+<html>
+<head>
+<script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+<p>Click the button to get your coordinates.</p>
+
+<button onclick="getLocation()">Try It</button>
+
+<p id="demo"></p>
+<p id="time"></p>
+<p id="arrival"></p>
+
+<script>
+var x = document.getElementById("demo");
+var htmlTime = document.getElementById("time");
+var htmlArrival = document.getElementById("arrival");
+
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+        x.innerHTML = "Geolocation is not supported by this browser.";
+    }
+}
+
+function showPosition(position) {
+    x.innerHTML = "Latitude: " + position.coords.latitude +
+    "<br>Longitude: " + position.coords.longitude;
+    var url = "https://router.project-osrm.org/table?output=json&z=18&loc=44.9072079,-122.9924872&loc="+position.coords.latitude+","+position.coords.longitude;
+    $.getJSON(url, function(data) {
+        var table = data.distance_table;
+        var avgTime = ((table[0][1] + table[1][0]) /2) / 10;
+        var min = Math.floor(avgTime / 60);
+        var sec = Math.round(avgTime % 60);
+        htmlTime.innerHTML = min + ":" + sec;
+        var arrival = new Date(Date.now() + avgTime * 1000);
+        htmlArrival.innerHTML = arrival.getHours() + ":" + arrival.getMinutes();
+    });
+
+}
+</script>
+</body>
+</html>
